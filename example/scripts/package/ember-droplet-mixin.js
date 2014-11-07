@@ -231,6 +231,8 @@
 
                 $ember.set(this, 'lastJqXhr', jqXhr);
 
+                var self = this;
+
                 // Return the promise.
                 return new Ember.RSVP.Promise(function(resolve, reject) {
                   jqXhr.done(resolve).fail(reject);
@@ -240,7 +242,10 @@
                     $ember.tryInvoke(this, 'didUploadFiles', [response]);
 
                     return response;
-                }));
+                }), function(response){
+                    $ember.tryInvoke(self, 'didUploadFiles', [response]);
+                    return response;
+                });
             }
 
         },
