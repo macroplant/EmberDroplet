@@ -228,6 +228,8 @@
 
                 $ember.set(this, 'lastJqXhr', jqXhr);
 
+                self = this;
+
                 // Return the promise.
                 return new $ember.RSVP.Promise(function(resolve, reject) {
 
@@ -239,7 +241,9 @@
                     $ember.tryInvoke(this, 'didUploadFiles', [response]);
                     return response;
 
-                }));
+                }), function(response){
+                    $ember.tryInvoke(self, 'didUploadFiles', [response]);
+                });
             }
 
         },
