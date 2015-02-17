@@ -1,6 +1,6 @@
 (function($window, $ember, $jQuery) {
 
-    "use strict";
+    // "use strict";
 
     /**
      * @module App

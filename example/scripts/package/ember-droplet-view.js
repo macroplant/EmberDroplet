@@ -1,6 +1,6 @@
 (function($window, $ember) {
 
-    "use strict";
+    // "use strict";
 
     /**
      * @property MultipleInput

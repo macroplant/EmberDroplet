@@ -1,6 +1,6 @@
 (function($window, $ember, $jQuery) {
 
-    "use strict";
+    // "use strict";
 
     /**
      * @module App
@@ -486,7 +486,7 @@
 })(window, window.Ember, window.jQuery);
 ;(function($window, $ember) {
 
-    "use strict";
+    // "use strict";
 
     /**
      * @property MultipleInput
