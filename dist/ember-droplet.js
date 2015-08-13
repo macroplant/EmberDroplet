@@ -554,7 +554,7 @@
      * @type Ember.View
      * @extends Ember.View
      */
-    $window.DropletView = $ember.View.extend({
+    $window.DropletView = $ember.Component.extend({
 
         /**
          * @property classNames
@@ -567,7 +567,7 @@
          * @property ImagePreview
          * @type {Ember.View}
          */
-        ImagePreview: $ember.View.extend({
+        ImagePreview: $ember.Component.extend({
 
             /**
              * @property tagName
@@ -644,13 +644,13 @@
          * @property MultipleInput
          * @type {Ember.View}
          */
-        MultipleInput: $ember.View.extend(MultipleInput),
+        MultipleInput: $ember.Component.extend(MultipleInput),
 
         /**
          * @property SingleInput
          * @type {Ember.View}
          */
-        SingleInput: $ember.View.extend(SingleInput),
+        SingleInput: $ember.Component.extend(SingleInput),
 
         /**
          * Invoked when the user drops a file onto the droppable area.
