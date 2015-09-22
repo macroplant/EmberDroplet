@@ -247,7 +247,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
      * @property options
      * @type {Object}
      */
-    options: {},
+    options: Ember.computed(function () {
+      return {};
+    }),
 
     /**
      * @property hooks
@@ -277,14 +279,20 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
       set(this, 'files', []);
       set(this, 'hooks', {});
 
+      // Copy across all of the default options into the options map.
       Object.keys(DEFAULT_OPTIONS).forEach(function (key) {
-
-        // Copy across all of the options into the options map.
-        set(_this, 'options.' + key, DEFAULT_OPTIONS[key]);
+        if (get(_this, 'options.' + key) === undefined) {
+          set(_this, 'options.' + key, DEFAULT_OPTIONS[key]);
+        }
       });
 
-      set(this, 'options.requestHeaders', {});
-      set(this, 'options.requestPostData', {});
+      if (get(this, 'options.requestHeaders') === undefined) {
+        set(this, 'options.requestHeaders', {});
+      }
+
+      if (get(this, 'options.requestPostData') === undefined) {
+        set(this, 'options.requestPostData', {});
+      }
 
       this.DropletEventBus && this.DropletEventBus.subscribe(EVENT_NAME, this, function () {
         for (var _len = arguments.length, files = Array(_len), _key = 0; _key < _len; _key++) {
