@@ -146,10 +146,40 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
   var MIME_MODE = { PUSH: 'push', SET: 'set' };
 
   /**
-   * @constant DEFAULT_OPTIONS
+   * @constant COMPUTED_OBSERVER
+   * @type {Array}
+   */
+  var COMPUTED_OBSERVER = String.w('files.length files.@each.statusType');
+
+  /**
+   * @constant MESSAGES
    * @type {Object}
    */
-  var DEFAULT_OPTIONS = {
+  var MESSAGES = {
+    URL_REQUIRED: 'Droplet: You must specify the URL parameter when constructing your component.'
+  };
+
+  /**
+   * @module Droplet
+   * @author Adam Timberlake
+   * @see https://github.com/Wildhoney/EmberDroplet
+   */
+  $window.Droplet = Mixin.create({
+
+    /**
+     * @property url
+     * @throws {Error}
+     * @type {Function}
+     */
+    url: function url() {
+      throw new Error(MESSAGES.URL_REQUIRED);
+    },
+
+    /**
+     * @property model
+     * @type {Ember.Object}
+     */
+    model: Model,
 
     /**
      * @property requestMethod
@@ -203,53 +233,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
      * @property requestPostData
      * @type {Object}
      */
-    requestPostData: {}
-
-  };
-
-  /**
-   * @constant COMPUTED_OBSERVER
-   * @type {Array}
-   */
-  var COMPUTED_OBSERVER = String.w('files.length files.@each.statusType');
-
-  /**
-   * @constant MESSAGES
-   * @type {Object}
-   */
-  var MESSAGES = {
-    URL_REQUIRED: 'Droplet: You must specify the URL parameter when constructing your component.'
-  };
-
-  /**
-   * @module Droplet
-   * @author Adam Timberlake
-   * @see https://github.com/Wildhoney/EmberDroplet
-   */
-  $window.Droplet = Mixin.create({
-
-    /**
-     * @property url
-     * @throws {Error}
-     * @type {Function}
-     */
-    url: function url() {
-      throw new Error(MESSAGES.URL_REQUIRED);
-    },
-
-    /**
-     * @property model
-     * @type {Ember.Object}
-     */
-    model: Model,
-
-    /**
-     * @property options
-     * @type {Object}
-     */
-    options: Ember.computed(function () {
-      return {};
-    }),
+    requestPostData: {},
 
     /**
      * @property hooks
@@ -278,21 +262,6 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
       set(this, 'files', []);
       set(this, 'hooks', {});
-
-      // Copy across all of the default options into the options map.
-      Object.keys(DEFAULT_OPTIONS).forEach(function (key) {
-        if (get(_this, 'options.' + key) === undefined) {
-          set(_this, 'options.' + key, DEFAULT_OPTIONS[key]);
-        }
-      });
-
-      if (get(this, 'options.requestHeaders') === undefined) {
-        set(this, 'options.requestHeaders', {});
-      }
-
-      if (get(this, 'options.requestPostData') === undefined) {
-        set(this, 'options.requestPostData', {});
-      }
 
       this.DropletEventBus && this.DropletEventBus.subscribe(EVENT_NAME, this, function () {
         for (var _len = arguments.length, files = Array(_len), _key = 0; _key < _len; _key++) {
@@ -420,10 +389,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
       var validMime = function validMime(mimeType) {
         return function () {
 
-          var anyRegExp = _this2.get('options.mimeTypes').some(function (mimeType) {
+          var anyRegExp = _this2.get('mimeTypes').some(function (mimeType) {
             return mimeType instanceof RegExp;
           });
-          var mimeTypes = get(_this2, 'options.mimeTypes');
+          var mimeTypes = get(_this2, 'mimeTypes');
 
           if (!anyRegExp) {
 
@@ -449,7 +418,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
        */
       var validSize = function validSize(fileSize) {
         return function () {
-          return fileSize <= Number(get(_this2, 'options.maximumSize'));
+          return fileSize <= Number(get(_this2, 'maximumSize'));
         };
       };
 
@@ -486,8 +455,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
     getFormData: function getFormData() {
 
       var formData = new $window.FormData();
-      var fieldName = this.get('options.useArray') ? 'file[]' : 'file';
-      var postData = this.get('options.requestPostData');
+      var fieldName = this.get('useArray') ? 'file[]' : 'file';
+      var postData = this.get('requestPostData');
       var files = get(this, 'validFiles').map(function (model) {
         return model.file;
       });
@@ -531,11 +500,11 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         return typeof value === 'function';
       };
       var url = isFunction(get(this, 'url')) ? get(this, 'url').apply(this) : get(this, 'url');
-      var method = get(this, 'options.requestMethod') || 'POST';
+      var method = get(this, 'requestMethod') || 'POST';
       var data = this.getFormData();
-      var headers = this.get('options.requestHeaders');
+      var headers = this.get('requestHeaders');
 
-      if (get(this, 'options.includeXFileSize')) {
+      if (get(this, 'includeXFileSize')) {
         headers['X-File-Size'] = this.get('requestSize');
       }
 
@@ -658,10 +627,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
       mimeTypes: function mimeTypes(_mimeTypes) {
         var mode = arguments.length <= 1 || arguments[1] === undefined ? MIME_MODE.PUSH : arguments[1];
 
-        mode === MIME_MODE.SET && set(this, 'options.mimeTypes', []);
+        mode === MIME_MODE.SET && set(this, 'mimeTypes', []);
         _mimeTypes = Array.isArray(_mimeTypes) ? _mimeTypes : [_mimeTypes];
-        var types = [].concat(_toConsumableArray(get(this, 'options.mimeTypes')), _toConsumableArray(_mimeTypes));
-        set(this, 'options.mimeTypes', types);
+        var types = [].concat(_toConsumableArray(get(this, 'mimeTypes')), _toConsumableArray(_mimeTypes));
+        set(this, 'mimeTypes', types);
       },
 
       /**
@@ -678,7 +647,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
         var addedModels = files.map(function (model) {
 
-          var willExceedQuota = _this6.get('validFiles.length') === _this6.get('options.maximumValidFiles');
+          var willExceedQuota = _this6.get('validFiles.length') === _this6.get('maximumValidFiles');
 
           if (model instanceof $Ember.Object) {
             var _ret = (function () {
@@ -701,7 +670,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
         addedModels.length && this.invokeHook.apply(this, ['didAdd'].concat(_toConsumableArray(addedModels)));
 
-        if (this.get('options.uploadImmediately')) {
+        if (this.get('uploadImmediately')) {
           this.send.apply(this, ['uploadFiles'].concat(_toConsumableArray(addedModels)));
         }
       },

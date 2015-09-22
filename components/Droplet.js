@@ -133,10 +133,38 @@
     const MIME_MODE = { PUSH: 'push', SET: 'set' };
 
     /**
-     * @constant DEFAULT_OPTIONS
+     * @constant COMPUTED_OBSERVER
+     * @type {Array}
+     */
+    const COMPUTED_OBSERVER = String.w('files.length files.@each.statusType');
+
+    /**
+     * @constant MESSAGES
      * @type {Object}
      */
-    const DEFAULT_OPTIONS = {
+    const MESSAGES = {
+        URL_REQUIRED: 'Droplet: You must specify the URL parameter when constructing your component.'
+    };
+
+    /**
+     * @module Droplet
+     * @author Adam Timberlake
+     * @see https://github.com/Wildhoney/EmberDroplet
+     */
+    $window.Droplet = Mixin.create({
+
+        /**
+         * @property url
+         * @throws {Error}
+         * @type {Function}
+         */
+        url: () => { throw new Error(MESSAGES.URL_REQUIRED); },
+
+        /**
+         * @property model
+         * @type {Ember.Object}
+         */
+        model: Model,
 
         /**
          * @property requestMethod
@@ -190,49 +218,7 @@
          * @property requestPostData
          * @type {Object}
          */
-        requestPostData: {}
-
-    };
-
-    /**
-     * @constant COMPUTED_OBSERVER
-     * @type {Array}
-     */
-    const COMPUTED_OBSERVER = String.w('files.length files.@each.statusType');
-
-    /**
-     * @constant MESSAGES
-     * @type {Object}
-     */
-    const MESSAGES = {
-        URL_REQUIRED: 'Droplet: You must specify the URL parameter when constructing your component.'
-    };
-
-    /**
-     * @module Droplet
-     * @author Adam Timberlake
-     * @see https://github.com/Wildhoney/EmberDroplet
-     */
-    $window.Droplet = Mixin.create({
-
-        /**
-         * @property url
-         * @throws {Error}
-         * @type {Function}
-         */
-        url: () => { throw new Error(MESSAGES.URL_REQUIRED); },
-
-        /**
-         * @property model
-         * @type {Ember.Object}
-         */
-        model: Model,
-
-        /**
-         * @property options
-         * @type {Object}
-         */
-        options: Ember.computed(() => {return {}}),
+        requestPostData: {},
 
         /**
          * @property hooks
@@ -260,21 +246,6 @@
 
             set(this, 'files', []);
             set(this, 'hooks', {});
-
-            // Copy across all of the default options into the options map.
-            Object.keys(DEFAULT_OPTIONS).forEach(key => {
-                if (get(this, `options.${key}`) === undefined) {
-                    set(this, `options.${key}`, DEFAULT_OPTIONS[key]);
-                }
-            });
-
-            if (get(this, 'options.requestHeaders') === undefined) {
-                set(this, 'options.requestHeaders', {});
-            }
-
-            if (get(this, 'options.requestPostData') === undefined) {
-                set(this, 'options.requestPostData', {});
-            }
 
             this.DropletEventBus && this.DropletEventBus.subscribe(EVENT_NAME, this, (...files) => {
                 this.send('prepareFiles', ...files);
@@ -389,8 +360,8 @@
              */
             const validMime = mimeType => () => {
 
-                const anyRegExp = this.get('options.mimeTypes').some(mimeType => mimeType instanceof RegExp);
-                const mimeTypes = get(this, 'options.mimeTypes');
+                const anyRegExp = this.get('mimeTypes').some(mimeType => mimeType instanceof RegExp);
+                const mimeTypes = get(this, 'mimeTypes');
 
                 if (!anyRegExp) {
 
@@ -416,7 +387,7 @@
              * @param {Number} fileSize
              * @return {Function}
              */
-            const validSize = fileSize => () => fileSize <= Number(get(this, 'options.maximumSize'));
+            const validSize = fileSize => () => fileSize <= Number(get(this, 'maximumSize'));
 
             /**
              * @method composeEvery
@@ -445,8 +416,8 @@
         getFormData() {
 
             const formData  = new $window.FormData();
-            const fieldName = this.get('options.useArray') ? 'file[]' : 'file';
-            const postData  = this.get('options.requestPostData');
+            const fieldName = this.get('useArray') ? 'file[]' : 'file';
+            const postData  = this.get('requestPostData');
             const files     = get(this, 'validFiles').map(model => model.file);
 
             files.forEach(file => {
@@ -487,11 +458,11 @@
 
             const isFunction = value => typeof value === 'function';
             const url        = isFunction(get(this, 'url')) ? get(this, 'url').apply(this) : get(this, 'url');
-            const method     = get(this, 'options.requestMethod') || 'POST';
+            const method     = get(this, 'requestMethod') || 'POST';
             const data       = this.getFormData();
-            const headers    = this.get('options.requestHeaders');
+            const headers    = this.get('requestHeaders');
 
-            if (get(this, 'options.includeXFileSize')) {
+            if (get(this, 'includeXFileSize')) {
                 headers['X-File-Size'] = this.get('requestSize');
             }
 
@@ -609,10 +580,10 @@
              * @return {void}
              */
             mimeTypes(mimeTypes, mode = MIME_MODE.PUSH) {
-                mode === MIME_MODE.SET && set(this, 'options.mimeTypes', []);
+                mode === MIME_MODE.SET && set(this, 'mimeTypes', []);
                 mimeTypes = Array.isArray(mimeTypes) ? mimeTypes : [mimeTypes];
-                const types = [...get(this, 'options.mimeTypes'), ...mimeTypes];
-                set(this, 'options.mimeTypes', types);
+                const types = [...get(this, 'mimeTypes'), ...mimeTypes];
+                set(this, 'mimeTypes', types);
             },
 
             /**
@@ -624,7 +595,7 @@
 
                 const addedModels = files.map(model => {
 
-                    const willExceedQuota = this.get('validFiles.length') === this.get('options.maximumValidFiles');
+                    const willExceedQuota = this.get('validFiles.length') === this.get('maximumValidFiles');
 
                     if (model instanceof $Ember.Object) {
 
@@ -638,7 +609,7 @@
 
                 addedModels.length && this.invokeHook('didAdd', ...addedModels);
 
-                if (this.get('options.uploadImmediately')) {
+                if (this.get('uploadImmediately')) {
                     this.send('uploadFiles', ...addedModels);
                 }
 
