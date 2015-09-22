@@ -232,7 +232,7 @@
          * @property options
          * @type {Object}
          */
-        options: Ember.computed(() => {return {}}),
+        options: {},
 
         /**
          * @property hooks
@@ -261,20 +261,15 @@
             set(this, 'files', []);
             set(this, 'hooks', {});
 
-            // Copy across all of the default options into the options map.
             Object.keys(DEFAULT_OPTIONS).forEach(key => {
-                if (get(this, `options.${key}`) === undefined) {
-                    set(this, `options.${key}`, DEFAULT_OPTIONS[key]);
-                }
+
+                // Copy across all of the options into the options map.
+                set(this, `options.${key}`, DEFAULT_OPTIONS[key]);
+
             });
 
-            if (get(this, 'options.requestHeaders') === undefined) {
-                set(this, 'options.requestHeaders', {});
-            }
-
-            if (get(this, 'options.requestPostData') === undefined) {
-                set(this, 'options.requestPostData', {});
-            }
+            set(this, 'options.requestHeaders', {});
+            set(this, 'options.requestPostData', {});
 
             this.DropletEventBus && this.DropletEventBus.subscribe(EVENT_NAME, this, (...files) => {
                 this.send('prepareFiles', ...files);
